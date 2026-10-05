@@ -479,6 +479,31 @@ async function abrirCompartido(tk){
   }catch(e){$("vistaCarga").textContent="No se pudo abrir: "+e.message}
 }
 
+function importar(){
+  const inp=document.createElement("input");
+  inp.type="file";inp.accept=".json,application/json";
+  inp.addEventListener("change",()=>{
+    const f=inp.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=async()=>{
+      let p;
+      try{ p=normalizar(JSON.parse(r.result)); }
+      catch(e){ aviso("Ese archivo no es un proyecto válido"); return; }
+      const d=p.etapas.iniciar.datos||{};
+      if(d.nombre&&String(d.nombre).trim())p.nombre=String(d.nombre).trim();
+      if(!p.nombre)p.nombre=f.name.replace(/\.json$/i,"");
+      delete p.shareToken;
+      try{
+        const ref=await addDoc(collection(db,"proyectos"),
+          {owner:usuario.uid,doc:p,creado:serverTimestamp(),actualizado:serverTimestamp()});
+        proyecto=p;proyectoId=ref.id;abrirObra();aviso("Proyecto importado");
+      }catch(e){ aviso("No se pudo importar: "+e.message); }
+    };
+    r.readAsText(f);
+  });
+  inp.click();
+}
+
 function exportar(){
   if(!proyecto)return;
   const b=new Blob([JSON.stringify(proyecto,null,2)],{type:"application/json"});
@@ -508,6 +533,7 @@ function pintarAcciones(){
     add("Guardar","btn-main btn-sm",()=>guardar(false));
   }else{
     add("Salir","btn btn-sm",()=>signOut(auth));
+    add("Importar","btn btn-sm",importar);
     add("Nuevo proyecto","btn-main btn-sm",crear);
   }
 }
