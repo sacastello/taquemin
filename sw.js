@@ -1,5 +1,5 @@
 const CACHE = "taquemin-v1";
-const BASE = [ "./", "./index.html", "./manifest.json", "./icon.svg" ];
+const BASE = [ "./", "./index.html", "./manifest.json", "./favicon.png" ];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE)).then(() => self.skipWaiting()));
