@@ -479,6 +479,19 @@ async function abrirCompartido(tk){
   }catch(e){$("vistaCarga").textContent="No se pudo abrir: "+e.message}
 }
 
+async function borrarProyecto(){
+  if(!proyecto||!proyectoId)return;
+  preguntar("Borrar proyecto",
+    "Vas a borrar \u201c"+(proyecto.nombre||"")+"\u201d de la nube. No se puede deshacer. Si querés guardar una copia, usá antes Descargar copia.",
+    "Borrar", async()=>{
+      try{
+        await deleteDoc(doc(db,"proyectos",proyectoId));
+        aviso("Proyecto borrado");
+        volverAlista();
+      }catch(e){aviso("No se pudo borrar: "+e.message)}
+    });
+}
+
 function importar(){
   const inp=document.createElement("input");
   inp.type="file";inp.accept=".json,application/json";
@@ -530,6 +543,7 @@ function pintarAcciones(){
   if(proyecto){
     add("Compartir","btn btn-sm",compartir);
     add("Descargar copia","btn btn-sm",exportar);
+    add("Borrar","btn btn-sm",borrarProyecto);
     add("Guardar","btn-main btn-sm",()=>guardar(false));
   }else{
     add("Salir","btn btn-sm",()=>signOut(auth));
